@@ -1,31 +1,37 @@
+import Logger from "../../../logger/Logger";
+
 /**
  * Обший класс для телеграм-ботов в приложении
  */
 export default abstract class TelegramBot {
     /**
+     * Уникальный идентификатор бота, начинающийся с @
+     * @protected
+     */
+    protected readonly _id: string;
+    /**
      * Имя бота
      */
-    private readonly _name: string;
+    protected readonly _name: string;
     /**
      * Описание бота
      */
-    private readonly _description: string;
+    protected readonly _description: string;
+    /**
+     * Логгер для действий бота
+     * @private
+     */
+    protected readonly _logger: Logger;
 
-    protected constructor(name: string, description: string) {
+    protected constructor(id: string, name: string, description: string, logger: Logger) {
+        this._id = id;
         this._name = name;
         this._description = description;
+        this._logger = logger;
     }
 
     /**
      * Инициализация и запуск бота
      */
     abstract start(): Promise<void>
-
-    public getName(): string {
-        return this._name;
-    }
-
-    public getDescription(): string {
-        return this._description;
-    }
 }

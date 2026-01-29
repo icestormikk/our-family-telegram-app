@@ -1,13 +1,16 @@
-export default abstract class Event {
-    private readonly _id: string;
+import Logger from "../../../logger/Logger";
 
-    protected constructor(id: string) {
+export default abstract class Event {
+    protected readonly _id: string;
+    protected readonly _logger: Logger;
+
+    protected constructor(id: string, logger: Logger) {
         this._id = id;
+        this._logger = logger;
     }
 
-    abstract launch(): Promise<void>
-
-    public getId(): string {
-        return this._id;
+    public launch(): Promise<void> {
+        this._logger.trace(`Event ${this._id} has been launched!`)
+        return Promise.resolve();
     }
 }
