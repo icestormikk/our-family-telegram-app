@@ -1,4 +1,5 @@
 import Logger from "../../../logger/Logger";
+import TelegramChat from "../../../database/entities/TelegramChat";
 
 export default abstract class Event {
     protected readonly _id: string;
@@ -9,8 +10,8 @@ export default abstract class Event {
         this._logger = logger;
     }
 
-    public launch(): Promise<void> {
-        this._logger.trace(`Event ${this._id} has been launched!`)
+    public launch(chat: TelegramChat): Promise<void> {
+        this._logger.trace(`Event ${this._id} has been launched in chat with ${chat.chatId} id.`)
         return Promise.resolve();
     }
 }

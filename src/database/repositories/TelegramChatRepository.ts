@@ -1,6 +1,7 @@
 import ITelegramChatRepository from "./abstract/ITelegramChatRepository";
 import {DataSource, FindOptionsWhere, Repository} from "typeorm";
 import TelegramChat from "../entities/TelegramChat";
+import EntityNotFoundError from "../../domain/errors/database/EntityNotFoundError";
 
 export default class TelegramChatRepository implements ITelegramChatRepository<number, FindOptionsWhere<TelegramChat>> {
     private readonly _repository: Repository<TelegramChat>;
@@ -17,16 +18,18 @@ export default class TelegramChatRepository implements ITelegramChatRepository<n
         return this._repository.findBy(options);
     }
 
-    async getOne(options: FindOptionsWhere<TelegramChat>): Promise<TelegramChat> {
-        return this._repository.findOneByOrFail(options);
+    async getOne(options: FindOptionsWhere<TelegramChat>): Promise<TelegramChat|null> {
+        return this._repository.findOneBy(options);
     }
 
     async create(chat: TelegramChat): Promise<TelegramChat> {
-        return this._repository.create(chat);
+        return this._repository.save(chat);
     }
 
     async updateById(id: number, data: TelegramChat): Promise<TelegramChat> {
         const chat = await this.getOne({ id: id });
+        if(!chat)
+            throw new EntityNotFoundError(`Telegram chat with id ${id} not found`);
 
         Object.assign(chat, data);
 

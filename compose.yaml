@@ -1,0 +1,30 @@
+services:
+  database:
+    image: postgres:latest
+    container_name: our-family-database
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - default
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: our-family-pgadmin
+    restart: always
+    ports:
+      - "8888:80"
+    depends_on:
+      - database
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    networks:
+      - default
+
+networks:
+  default:
+

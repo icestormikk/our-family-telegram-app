@@ -1,7 +1,6 @@
 import {DataSource} from "typeorm";
 import Environment from "../domain/abstract/Environment";
 import TelegramChat from "./entities/TelegramChat";
-import GrammyTelegramBot from "./entities/bots/GrammyTelegramBot";
 
 /**
  * Настройки соединения с базой данных (PostgreSQL)
@@ -16,8 +15,9 @@ export default class PostgresDatabase {
             port: environment.getNumber("POSTGRES_PORT"),
             username: environment.getString("POSTGRES_USER"),
             password: environment.getString("POSTGRES_PASSWORD"),
+            database: environment.getString("POSTGRES_DB"),
             logging: true,
-            entities: [GrammyTelegramBot, TelegramChat],
+            entities: [TelegramChat],
             synchronize: true
         });
     }

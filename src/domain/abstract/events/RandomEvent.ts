@@ -1,6 +1,7 @@
 import Event from "./Event";
 import EventError from "../../errors/EventError";
 import Logger from "../../../logger/Logger";
+import TelegramChat from "../../../database/entities/TelegramChat";
 
 export default abstract class RandomEvent extends Event {
     private readonly _launchProbability: number;
@@ -14,16 +15,12 @@ export default abstract class RandomEvent extends Event {
         this._launchProbability = launchProbability;
     }
 
-    public launch(): Promise<void> {
+    public launch(chat: TelegramChat): Promise<void> {
         const probability = Math.random();
         if(probability < this._launchProbability)
-            return super.launch();
+            return super.launch(chat);
 
         return Promise.reject("Probability failed");
-    }
-
-    public getLaunchProbability(): number {
-        return this._launchProbability;
     }
 }
 

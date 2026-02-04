@@ -8,7 +8,9 @@
     "start": "npm run build && node dist/index.js"
   },
   "dependencies": {
+    "@grammyjs/chat-members": "^1.2.0",
     "grammy": "^1.39.3",
+    "node-cron": "^4.2.1",
     "openai": "^6.17.0",
     "pg": "^8.18.0",
     "pino": "^10.3.0",
