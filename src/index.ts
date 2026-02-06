@@ -12,6 +12,9 @@ import BublikGrammyTelegramBot from "./domain/bots/BublikGrammyTelegramBot";
 import MarsikGrammyTelegramBot from "./domain/bots/MarsikGrammyTelegramBot";
 import EventSystem from "./domain/events/EventSystem";
 import BotsContainer from "./domain/bots/BotsContainer";
+import LeilaGrammyTelegramBot from "./domain/bots/LeilaGrammyTelegramBot";
+import DeepseekClient from "./domain/DeepseekClient";
+import {createClient, RedisClientType} from "redis";
 
 (async function() {
     const XLogger: Logger = new PinoLogger();
@@ -26,11 +29,18 @@ import BotsContainer from "./domain/bots/BotsContainer";
         const XTelegramChatRepository = new TelegramChatRepository(XDatabase);
         const XTelegramChatService = new TelegramChatService(XTelegramChatRepository);
 
-        const XEventSystem = EventSystem.get(XTelegramChatService, XLogger);
+        const XDeepseekClient = new DeepseekClient(XEnvironment.getString("DEEPSEEK_API_KEY"));
 
-        BotsContainer.registerBot("our_family_admin_bot", new AdministratorGrammyTelegramBot(XTelegramChatService, XLogger, XEnvironment.getString("BOT_TOKEN_ADMINISTRATOR")));
-        BotsContainer.registerBot("marsik_toy_bot", new MarsikGrammyTelegramBot(XLogger, XEnvironment.getString("BOT_TOKEN_MARSIK")));
-        BotsContainer.registerBot("bublik_toy_bot", new BublikGrammyTelegramBot(XLogger, XEnvironment.getString("BOT_TOKEN_BUBLIK")));
+        const XRedisClient: RedisClientType = createClient({ url: XEnvironment.getString("REDIS_URL") });
+        XRedisClient.on("error", (e) => XLogger.error(e, "Redis Client error"))
+        await XRedisClient.connect();
+
+        await EventSystem.init(XTelegramChatService, XLogger, XRedisClient, XDeepseekClient).start();
+
+        BotsContainer.registerBot("our_family_admin_bot", new AdministratorGrammyTelegramBot(XTelegramChatService, XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_ADMINISTRATOR")));
+        BotsContainer.registerBot("marsik_toy_bot", new MarsikGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_MARSIK")));
+        BotsContainer.registerBot("bublik_toy_bot", new BublikGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_BUBLIK")));
+        BotsContainer.registerBot("leila_toy_bot", new LeilaGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_LEILA")));
 
         for(const bot of BotsContainer.getAllBots())
             bot.start();

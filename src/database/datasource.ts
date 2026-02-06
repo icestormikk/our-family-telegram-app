@@ -16,7 +16,7 @@ export default class PostgresDatabase {
             username: environment.getString("POSTGRES_USER"),
             password: environment.getString("POSTGRES_PASSWORD"),
             database: environment.getString("POSTGRES_DB"),
-            logging: true,
+            logging: false,
             entities: [TelegramChat],
             synchronize: true
         });

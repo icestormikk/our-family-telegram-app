@@ -8,6 +8,5 @@ export default class InteractionWithUserEvent extends RandomEvent {
     }
 
     public async launch(chat: TelegramChat): Promise<void> {
-
     }
 }

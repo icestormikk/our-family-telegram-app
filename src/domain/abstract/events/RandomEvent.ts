@@ -20,7 +20,7 @@ export default abstract class RandomEvent extends Event {
         if(probability < this._launchProbability)
             return super.launch(chat);
 
-        return Promise.reject("Probability failed");
+        throw new EventError("Launch probability error")
     }
 }
 
