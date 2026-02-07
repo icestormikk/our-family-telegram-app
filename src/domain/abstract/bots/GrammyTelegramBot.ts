@@ -1,9 +1,9 @@
 import {UserFromGetMe} from "grammy/types";
 import TelegramBot from "./TelegramBot";
-import {Bot, Context} from "grammy";
+import {Bot, Context, InputFile} from "grammy";
 import Logger from "../../../logger/Logger";
 import DeepseekClient from "../../DeepseekClient";
-import RedisConsumer from "../redis/RedisConsumer";
+import RedisStreamConsumer from "../redis/RedisStreamConsumer";
 import {RedisClientType} from "redis";
 import {schedule, ScheduledTask} from "node-cron";
 
@@ -16,7 +16,7 @@ export type GrammyTelegramBotContext = Context;
 /**
  * Абстрактный класс для всех телеграм-ботов, созданных через библиотеку {@link https://grammy.dev/|grammyjs}
  */
-export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotContext = GrammyTelegramBotContext> extends TelegramBot implements RedisConsumer {
+export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotContext = GrammyTelegramBotContext> extends TelegramBot implements RedisStreamConsumer {
     /**
      * Объект для составления и отправки запроса к нейросетевым чат-моделям
      * @protected
@@ -68,7 +68,7 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
 
     protected async onBotStarted(botInfo: UserFromGetMe): Promise<void> {
         this._logger.info(`Bot ${this.username} has been started!`);
-        this.redisCronJob = schedule("*/30 * * * * *", async () => { await this.read() });
+        this.redisCronJob = schedule("*/30 * * * * *", async () => { await this.consume() });
     }
 
     protected async onMessage(ctx: T): Promise<void> {
@@ -87,13 +87,23 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
         await ctx.reply(response, { reply_to_message_id: ctx.message?.message_id });
     }
 
-    public async sendMessage(chatId: number, message: string) {
-        await this._instance.api.sendMessage(chatId, message);
+    public async sendMessage(chatId: number, message: string, replyToId?: number): Promise<number> {
+        const sentMessage = await this._instance.api.sendMessage(chatId, message, { reply_to_message_id: replyToId });
+        return sentMessage.message_id;
+    }
+
+    async sendWithAnimation(chatId: number, animationFilepath: string, caption?: string): Promise<number> {
+        const sentAnimation = await this._instance.api.sendAnimation(chatId, new InputFile(animationFilepath), { caption: caption });
+        return sentAnimation.message_id;
+    }
+
+    public async sendChatAction(chatId: number, action: "typing" | "upload_photo" | "record_video" | "upload_video" | "record_voice" | "upload_voice" | "upload_document" | "choose_sticker" | "find_location" | "record_video_note" | "upload_video_note"): Promise<void> {
+        await this._instance.api.sendChatAction(chatId, action);
     }
 
     // Redis >>>
 
-    async read(): Promise<void> {
+    async consume(): Promise<void> {
         try {
             await this._redisClient.xGroupCreate(`streams:${this.username}`, `groups:${this.username}`, "$", { MKSTREAM: true });
         } catch (e: any) {
@@ -116,6 +126,7 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
                 const data = message.message.data;
                 const botMessage = JSON.parse(data) as { message: string, chatId: number };
 
+                await this.sendChatAction(botMessage.chatId, "typing");
                 const reply = await this._deepseekClient.replyToMessage(this, botMessage.message);
                 await this.sendMessage(botMessage.chatId, reply);
 

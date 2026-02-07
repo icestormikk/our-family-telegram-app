@@ -1,7 +1,7 @@
 /**
  * Методы для записи данных в потоки (Streams) хранилища Redis
  */
-export default interface RedisPublisher {
+export default interface RedisStreamPublisher {
     /**
      * Добавление сообшение в поток в хранилище Redis
      * @param stream Уникальный идентификатор потока в Redis

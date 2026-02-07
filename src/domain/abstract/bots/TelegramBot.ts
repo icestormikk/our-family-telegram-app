@@ -46,6 +46,23 @@ export default abstract class TelegramBot {
      * Отправка сообщения в телеграм-чат
      * @param chatId Уникальный идентификатор телеграм-чата
      * @param message Текстовое содержимое сообщения
+     * @param replyToId Сообщение на которое отправляется ответ
+     * @return Идентификатор отправленного сообщения
      */
-    abstract sendMessage(chatId: number, message: string): Promise<void>;
+    abstract sendMessage(chatId: number, message: string, replyToId?: number): Promise<number>;
+
+    /**
+     * Отправка сообщения с анимацией (и возможным текстом к ней) в телеграм-чат
+     * @param chatId Уникальный идентификатор чата
+     * @param animationFilepath Путь к файлу с анимацией
+     * @param caption Подпись к сообщению
+     */
+    abstract sendWithAnimation(chatId: number, animationFilepath: string, caption?: string): Promise<number>;
+
+    /**
+     * Установка статуса действия для телеграм-бота в чате (максимум на 5 секунд)
+     * @param chatId
+     * @param action
+     */
+    abstract sendChatAction(chatId: number, action: "typing" | "upload_photo" | "record_video" | "upload_video" | "record_voice" | "upload_voice" | "upload_document" | "choose_sticker" | "find_location" | "record_video_note" | "upload_video_note"): Promise<void>;
 }

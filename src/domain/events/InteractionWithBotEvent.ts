@@ -43,10 +43,12 @@ export default class InteractionWithBotEvent extends RandomEvent {
 
             this._logger.trace(`WHO: ${who.username}, WHOM: ${whom.username}`);
 
+            await whoBot.sendChatAction(chat.chatId, "typing");
             const text = await this._deepseekClient.startConversation(whoBot, whomBot);
 
-            await EventSystem.get().publish(`streams:${whomBot.username}`, { chatId: chat.chatId, message: text });
             await whoBot.sendMessage(chat.chatId, text);
+
+            await EventSystem.get().publish(`streams:${whomBot.username}`, { chatId: chat.chatId, message: text });
         } catch (e: any) {
             this._logger.error(e,`Error while executing ${this._id} event`)
         }

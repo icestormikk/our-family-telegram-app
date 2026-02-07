@@ -6,16 +6,19 @@ import Event from "../../domain/abstract/events/Event";
 import {schedule, ScheduledTask} from "node-cron";
 import InteractionWithBotEvent from "./InteractionWithBotEvent";
 import DeepseekClient from "../DeepseekClient";
-import RedisPublisher from "../abstract/redis/RedisPublisher";
+import RedisStreamPublisher from "../abstract/redis/RedisStreamPublisher";
 import {RedisClientType} from "redis";
+import ValentineDayEvent from "./ValentineDayEvent";
+import DatetimeEvent from "../abstract/events/DatetimeEvent";
 
-export default class EventSystem implements IEventSystem, RedisPublisher {
+export default class EventSystem implements IEventSystem, RedisStreamPublisher {
     private static Instance: EventSystem;
     private static readonly EventsTimeoutMs = /*3_600_000*/60_000;
 
     private readonly _telegramChatService: ITelegramChatService;
     private readonly _redisClient: RedisClientType;
     private readonly _logger: Logger;
+    private readonly _datetimeEvents: DatetimeEvent[];
     private readonly _events: Event[];
 
     private _checkEventsJob: ScheduledTask;
@@ -24,6 +27,7 @@ export default class EventSystem implements IEventSystem, RedisPublisher {
         this._telegramChatService = telegramChatService;
         this._redisClient = redisClient;
         this._logger = logger;
+        this._datetimeEvents = [new ValentineDayEvent(logger, telegramChatService, deepseekClient)];
         this._events = [new InteractionWithBotEvent(logger, deepseekClient)];
     }
 
@@ -40,10 +44,13 @@ export default class EventSystem implements IEventSystem, RedisPublisher {
 
         for(const chat of chats) {
             try {
+                for(const datetimeEvent of this._datetimeEvents)
+                    await datetimeEvent.launch(chat);
+
                 const { lastMessageTime } = chat;
 
                 if(!lastMessageTime || Math.abs(new Date().getTime() - lastMessageTime.getTime()) > EventSystem.EventsTimeoutMs) {
-                    await this.launchEvent(chat);
+                    await this.launchEvent(chat, this._events[Math.floor(this._events.length * Math.random())]);
                     chat.lastMessageTime = new Date();
                     await this._telegramChatService.updateChatById(chat.id, chat);
                 }
@@ -67,17 +74,11 @@ export default class EventSystem implements IEventSystem, RedisPublisher {
         return EventSystem.Instance;
     }
 
-    public async launchEvent(chat: TelegramChat): Promise<void> {
-        const index = Math.floor(this._events.length * Math.random());
-        const event = this._events[index];
-
-        if(!event)
-            return;
-
+    public async launchEvent(chat: TelegramChat, event: Event): Promise<void> {
         await event.launch(chat);
     }
 
     async publish(stream: string, data: object): Promise<string> {
-        return  await this._redisClient.xAdd(stream, "*", {data: JSON.stringify(data)});
+        return await this._redisClient.xAdd(stream, "*", {data: JSON.stringify(data)});
     }
 }

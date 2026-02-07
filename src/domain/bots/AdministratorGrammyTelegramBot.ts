@@ -1,7 +1,7 @@
 import GrammyTelegramBot, {GrammyTelegramBotContext} from "../abstract/bots/GrammyTelegramBot";
 import Logger from "../../logger/Logger";
 import type {ChatMember} from "@grammyjs/types";
-import {MemorySessionStorage} from "grammy";
+import {InputFile, MemorySessionStorage} from "grammy";
 import {chatMembers, ChatMembersFlavor} from "@grammyjs/chat-members";
 import TelegramChatService from "../../database/services/TelegramChatService";
 import ITelegramChatService from "../../database/services/abstract/ITelegramChatService";
@@ -39,6 +39,9 @@ export default class AdministratorGrammyTelegramBot extends GrammyTelegramBot<Ad
     protected async onMessage(ctx: AdministratorGrammyTelegramBotContext): Promise<void> {
         await super.onMessage(ctx);
 
+        if(ctx.message?.text!.includes("birthday_photo"))
+            return await this.onBirthdayPhoto(ctx);
+
         const { from, chatId } = ctx;
         if(!(from && chatId))
             return;
@@ -53,6 +56,9 @@ export default class AdministratorGrammyTelegramBot extends GrammyTelegramBot<Ad
 
         chat.chatMembers.push(from);
         await this._telegramChatService.updateChatById(chat.id, chat);
+    }
+
+    private async onBirthdayPhoto(ctx: AdministratorGrammyTelegramBotContext) {
     }
 
     /**

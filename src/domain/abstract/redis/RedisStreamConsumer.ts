@@ -1,9 +1,9 @@
 /**
  * Методы для получения данных из хранилища Redis
  */
-export default interface RedisConsumer {
+export default interface RedisStreamConsumer {
     /**
      * Прочитать данные из нескольких потоков
      */
-    read(): Promise<any>
+    consume(): Promise<any>
 }
