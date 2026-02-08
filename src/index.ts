@@ -15,6 +15,13 @@ import BotsContainer from "./domain/bots/BotsContainer";
 import LeilaGrammyTelegramBot from "./domain/bots/LeilaGrammyTelegramBot";
 import DeepseekClient from "./domain/DeepseekClient";
 import {createClient, RedisClientType} from "redis";
+import StasicGrammyTelegramBot from "./domain/bots/StasicGrammyTelegramBot";
+import KudryashkaGrammyTelegramBot from "./domain/bots/KudryashkaGrammyTelegramBot";
+import KvakunGrammyTelegramBot from "./domain/bots/KvakunGrammyTelegramBot";
+import KitsuneGrammyTelegramBot from "./domain/bots/KitsuneGrammyTelegramBot";
+import MalishkaGrammyTelegramBot from "./domain/bots/MalishkaGrammyTelegramBot";
+import MishkaGrammyTelegramBot from "./domain/bots/MishkaGrammyTelegramBot";
+import LisichkaGrammyTelegramBot from "./domain/bots/LisichkaGrammyTelegramBot";
 
 (async function() {
     const XLogger: Logger = new PinoLogger();
@@ -41,6 +48,13 @@ import {createClient, RedisClientType} from "redis";
         BotsContainer.registerBot("marsik_toy_bot", new MarsikGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_MARSIK")));
         BotsContainer.registerBot("bublik_toy_bot", new BublikGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_BUBLIK")));
         BotsContainer.registerBot("leila_toy_bot", new LeilaGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_LEILA")));
+        BotsContainer.registerBot("stasic_toy_bot", new StasicGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_STASIC")));
+        BotsContainer.registerBot("kudryashka_toy_bot", new KudryashkaGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_KUDRYASHKA")));
+        BotsContainer.registerBot("kvakun_toy_bot", new KvakunGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_KVAKUN")));
+        BotsContainer.registerBot("kitsune_toy_bot", new KitsuneGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_KITSUNE")));
+        BotsContainer.registerBot("malishka_toy_bot", new MalishkaGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_MALISHKA")));
+        BotsContainer.registerBot("mishka_toy_bot", new MishkaGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_MISHKA")));
+        BotsContainer.registerBot("lisichka_toy_bot", new LisichkaGrammyTelegramBot(XLogger, XDeepseekClient, XRedisClient, XEnvironment.getString("BOT_TOKEN_LISICHKA")));
 
         for(const bot of BotsContainer.getAllBots())
             bot.start();

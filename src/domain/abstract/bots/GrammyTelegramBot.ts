@@ -68,7 +68,7 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
 
     protected async onBotStarted(botInfo: UserFromGetMe): Promise<void> {
         this._logger.info(`Bot ${this.username} has been started!`);
-        this.redisCronJob = schedule("*/30 * * * * *", async () => { await this.consume() });
+        this.redisCronJob = schedule("*/10 * * * * *", async () => { await this.consume() });
     }
 
     protected async onMessage(ctx: T): Promise<void> {
@@ -130,8 +130,9 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
                 const reply = await this._deepseekClient.replyToMessage(this, botMessage.message);
                 await this.sendMessage(botMessage.chatId, reply);
 
+                this._logger.trace(`Start ack message ${message.id} in ${this.username}`);
                 await this._redisClient.xAck(`streams:${this.username}`, `groups:${this.username}`, message.id);
-                this._logger.trace(`Ack message ${message.id} in ${this.username}`);
+                this._logger.trace(`Successfully ack message ${message.id} in ${this.username}`);
             }
         }
     }

@@ -39,9 +39,6 @@ export default class AdministratorGrammyTelegramBot extends GrammyTelegramBot<Ad
     protected async onMessage(ctx: AdministratorGrammyTelegramBotContext): Promise<void> {
         await super.onMessage(ctx);
 
-        if(ctx.message?.text!.includes("birthday_photo"))
-            return await this.onBirthdayPhoto(ctx);
-
         const { from, chatId } = ctx;
         if(!(from && chatId))
             return;
@@ -56,9 +53,6 @@ export default class AdministratorGrammyTelegramBot extends GrammyTelegramBot<Ad
 
         chat.chatMembers.push(from);
         await this._telegramChatService.updateChatById(chat.id, chat);
-    }
-
-    private async onBirthdayPhoto(ctx: AdministratorGrammyTelegramBotContext) {
     }
 
     /**

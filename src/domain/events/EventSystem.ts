@@ -32,7 +32,7 @@ export default class EventSystem implements IEventSystem, RedisStreamPublisher {
     }
 
     async start(): Promise<void> {
-        this._checkEventsJob = schedule("* * * * *", this.checkEvents.bind(this), { noOverlap: true });
+        this._checkEventsJob = schedule("* * * * *", this.checkEvents.bind(this));
     }
 
     async stop(): Promise<void> {
