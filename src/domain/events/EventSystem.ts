@@ -7,7 +7,7 @@ import {schedule, ScheduledTask} from "node-cron";
 import InteractionWithBotEvent from "./InteractionWithBotEvent";
 import DeepseekClient from "../DeepseekClient";
 import RedisStreamPublisher from "../abstract/redis/RedisStreamPublisher";
-import {RedisClientType} from "redis";
+import {RedisClientPoolType, RedisClientType} from "redis";
 import ValentineDayEvent from "./ValentineDayEvent";
 import DatetimeEvent from "../abstract/events/DatetimeEvent";
 
@@ -16,14 +16,14 @@ export default class EventSystem implements IEventSystem, RedisStreamPublisher {
     private static readonly EventsTimeoutMs = /*3_600_000*/60_000;
 
     private readonly _telegramChatService: ITelegramChatService;
-    private readonly _redisClient: RedisClientType;
+    private readonly _redisClient: RedisClientPoolType;
     private readonly _logger: Logger;
     private readonly _datetimeEvents: DatetimeEvent[];
     private readonly _events: Event[];
 
     private _checkEventsJob: ScheduledTask;
 
-    protected constructor(telegramChatService: ITelegramChatService, logger: Logger, redisClient: RedisClientType, deepseekClient: DeepseekClient) {
+    protected constructor(telegramChatService: ITelegramChatService, logger: Logger, redisClient: RedisClientPoolType, deepseekClient: DeepseekClient) {
         this._telegramChatService = telegramChatService;
         this._redisClient = redisClient;
         this._logger = logger;
@@ -60,7 +60,7 @@ export default class EventSystem implements IEventSystem, RedisStreamPublisher {
         }
     }
 
-    public static init(telegramChatService: ITelegramChatService, logger: Logger, redisClient: RedisClientType, deepseekClient: DeepseekClient): EventSystem {
+    public static init(telegramChatService: ITelegramChatService, logger: Logger, redisClient: RedisClientPoolType, deepseekClient: DeepseekClient): EventSystem {
         if(!EventSystem.Instance)
             EventSystem.Instance = new EventSystem(telegramChatService, logger, redisClient, deepseekClient);
 
@@ -79,6 +79,10 @@ export default class EventSystem implements IEventSystem, RedisStreamPublisher {
     }
 
     async publish(stream: string, data: object): Promise<string> {
-        return await this._redisClient.xAdd(stream, "*", {data: JSON.stringify(data)});
+        this._logger.trace(`Publishing message ${JSON.stringify(data)} to ${stream}`)
+        const res = await this._redisClient.xAdd(stream, "*", {data: JSON.stringify(data)});
+        this._logger.trace(`Successfully published message to ${stream} (id: ${res})`)
+
+        return res;
     }
 }

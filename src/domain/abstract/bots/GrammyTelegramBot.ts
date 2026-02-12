@@ -4,7 +4,7 @@ import {Bot, Context, InputFile} from "grammy";
 import Logger from "../../../logger/Logger";
 import DeepseekClient from "../../DeepseekClient";
 import RedisStreamConsumer from "../redis/RedisStreamConsumer";
-import {RedisClientType} from "redis";
+import {RedisClientPoolType} from "redis";
 import {schedule, ScheduledTask} from "node-cron";
 
 /**
@@ -26,7 +26,7 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
      * Объект для взаимодействия с хранилищем Redis
      * @protected
      */
-    protected readonly _redisClient: RedisClientType;
+    protected readonly _redisClient: RedisClientPoolType;
     /**
      * Объект класса {@link Bot}, представляющий API для взаимодействия с Telegram
      * @private
@@ -46,7 +46,7 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
      * @param botToken Токен бота, полученный от BotFather
      * @protected
      */
-    protected constructor(username: string, name: string, description: string, logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientType, botToken: string) {
+    protected constructor(username: string, name: string, description: string, logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientPoolType, botToken: string) {
         super(username, name, description, logger);
         this._instance = new Bot<T>(botToken);
         this._instance.on("message", this.onMessage.bind(this));
@@ -57,8 +57,8 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
     public async start(): Promise<void> {
         this._instance
             .start({ onStart: this.onBotStarted.bind(this), allowed_updates: ["chat_member", "message"] })
-            .then((r) => this._logger.info(`Bot ${this.name} has been stopped!`))
-            .catch((e) => this._logger.error(e, `Bot ${this.name} has been stopped with error`))
+            .then((r) => this._logger.info(`Bot ${this.username} has been stopped!`))
+            .catch((e) => this._logger.error(e, `Bot ${this.username} has been stopped with error`))
     }
 
     public async stop(): Promise<void> {
@@ -68,6 +68,14 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
 
     protected async onBotStarted(botInfo: UserFromGetMe): Promise<void> {
         this._logger.info(`Bot ${this.username} has been started!`);
+
+        try {
+            await this._redisClient.xGroupCreate(`streams:${this.username}`, `groups:${this.username}`, "$", { MKSTREAM: true });
+        } catch (e: any) {
+            if (!e.message.includes('BUSYGROUP'))
+                console.error(e);
+        }
+
         this.redisCronJob = schedule("*/10 * * * * *", async () => { await this.consume() });
     }
 
@@ -104,13 +112,6 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
     // Redis >>>
 
     async consume(): Promise<void> {
-        try {
-            await this._redisClient.xGroupCreate(`streams:${this.username}`, `groups:${this.username}`, "$", { MKSTREAM: true });
-        } catch (e: any) {
-            if (!e.message.includes('BUSYGROUP'))
-                console.error(e);
-        }
-
         const redisStreams = await this._redisClient.xReadGroup(
             `groups:${this.username}`,
             this.username,
@@ -122,6 +123,10 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
 
         for(const stream of redisStreams) {
             for(const message of stream.messages) {
+                this._logger.trace(`Start ack message ${message.id} in ${this.username}`);
+                await this._redisClient.xAck(`streams:${this.username}`, `groups:${this.username}`, message.id);
+                this._logger.trace(`Successfully ack message ${message.id} in ${this.username}`);
+
                 this._logger.trace(`Handling message ${message.id} in streams:${this.username}`);
                 const data = message.message.data;
                 const botMessage = JSON.parse(data) as { message: string, chatId: number };
@@ -129,10 +134,6 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
                 await this.sendChatAction(botMessage.chatId, "typing");
                 const reply = await this._deepseekClient.replyToMessage(this, botMessage.message);
                 await this.sendMessage(botMessage.chatId, reply);
-
-                this._logger.trace(`Start ack message ${message.id} in ${this.username}`);
-                await this._redisClient.xAck(`streams:${this.username}`, `groups:${this.username}`, message.id);
-                this._logger.trace(`Successfully ack message ${message.id} in ${this.username}`);
             }
         }
     }

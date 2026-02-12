@@ -1,13 +1,13 @@
 import GrammyTelegramBot, {GrammyTelegramBotContext} from "../abstract/bots/GrammyTelegramBot";
 import Logger from "../../logger/Logger";
 import type {ChatMember} from "@grammyjs/types";
-import {InputFile, MemorySessionStorage} from "grammy";
+import {MemorySessionStorage} from "grammy";
 import {chatMembers, ChatMembersFlavor} from "@grammyjs/chat-members";
 import TelegramChatService from "../../database/services/TelegramChatService";
 import ITelegramChatService from "../../database/services/abstract/ITelegramChatService";
 import TelegramChat from "../../database/entities/TelegramChat";
 import DeepseekClient from "../DeepseekClient";
-import {RedisClientType} from "redis";
+import {RedisClientPoolType} from "redis";
 
 export type AdministratorGrammyTelegramBotContext = GrammyTelegramBotContext & ChatMembersFlavor;
 
@@ -17,7 +17,7 @@ export type AdministratorGrammyTelegramBotContext = GrammyTelegramBotContext & C
 export default class AdministratorGrammyTelegramBot extends GrammyTelegramBot<AdministratorGrammyTelegramBotContext> {
     private readonly _telegramChatService: ITelegramChatService;
 
-    public constructor(telegramChatService: TelegramChatService, logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientType, botToken: string) {
+    public constructor(telegramChatService: TelegramChatService, logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientPoolType, botToken: string) {
         super(
             "@our_family_admin_bot",
             "Администратор",

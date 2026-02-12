@@ -11,7 +11,7 @@ export default class InteractionWithBotEvent extends RandomEvent {
     private readonly _deepseekClient: DeepseekClient;
 
     public constructor(logger: Logger, deepseekClient: DeepseekClient) {
-        super("interaction-with-bot", logger, 0.8);
+        super("interaction-with-bot", logger, 0.9);
         this._deepseekClient = deepseekClient;
     }
 

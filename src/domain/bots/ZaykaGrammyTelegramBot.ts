@@ -3,12 +3,15 @@ import Logger from "../../logger/Logger";
 import DeepseekClient from "../DeepseekClient";
 import {RedisClientPoolType} from "redis";
 
-export default class KvakunGrammyTelegramBot extends GrammyTelegramBot {
+/**
+ * Телеграм-бот игрушка "Зайка"
+ */
+export default class ZaykaGrammyTelegramBot extends GrammyTelegramBot {
     public constructor(logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientPoolType, botToken: string) {
         super(
-            "@kvakun_toy_bot",
-            "Квакун",
-            "Ты — Квакун, мишка в костюме лягушки. Характер: весёлый, шутливый, немного детский. Говоришь быстро и эмоционально, часто шутишь.",
+            "@zayka_toy_bot",
+            "Зайка",
+            "",
             logger,
             deepseekClient,
             redisClient,

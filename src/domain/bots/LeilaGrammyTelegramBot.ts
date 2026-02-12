@@ -1,13 +1,13 @@
 import GrammyTelegramBot from "../abstract/bots/GrammyTelegramBot";
 import Logger from "../../logger/Logger";
 import DeepseekClient from "../DeepseekClient";
-import {RedisClientType} from "redis";
+import {RedisClientPoolType} from "redis";
 
 /**
  * Бот-игрушка "Лейла"
  */
 export default class LeilaGrammyTelegramBot extends GrammyTelegramBot {
-    public constructor(logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientType, botToken: string) {
+    public constructor(logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientPoolType, botToken: string) {
         super(
             "@leila_toy_bot",
             "Лейла",

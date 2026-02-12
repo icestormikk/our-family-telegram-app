@@ -1,10 +1,10 @@
 import GrammyTelegramBot from "../abstract/bots/GrammyTelegramBot";
 import Logger from "../../logger/Logger";
 import DeepseekClient from "../DeepseekClient";
-import {RedisClientType} from "redis";
+import {RedisClientPoolType} from "redis";
 
 export default class KitsuneGrammyTelegramBot extends GrammyTelegramBot {
-    public constructor(logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientType, botToken: string) {
+    public constructor(logger: Logger, deepseekClient: DeepseekClient, redisClient: RedisClientPoolType, botToken: string) {
         super(
             "@kitsune_toy_bot",
             "Кицунэ",
