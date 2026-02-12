@@ -3,10 +3,6 @@ import {loadEnvFile} from "node:process";
 import EnvironmentError from "../errors/EnvironmentError";
 
 export default class ProcessEnvironment implements Environment {
-    public constructor(path: string) {
-        loadEnvFile(path);
-    }
-
     get<T>(key: string, receiver: (value: string) => T, defaultValue?: T): T {
         const value = process.env[key];
 

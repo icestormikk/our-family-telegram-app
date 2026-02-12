@@ -1,6 +1,24 @@
-name: "our-famuly-project-infra"
+name: "our-family-project-infra"
 
 services:
+#  application:
+#    container_name: our-family-application
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    depends_on:
+#      - database
+#      - redis
+#    networks:
+#      our-family-network:
+#    env_file:
+#      - .env
+#    environment:
+#      NODE_ENV: production
+#      POSTGRES_HOST: database
+#      POSTGRES_PORT: 5432
+#      REDIS_URL: redis://default:password@redis:6379
   database:
     image: postgres:latest
     container_name: our-family-database
@@ -10,6 +28,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     networks:
       our-family-network:
 

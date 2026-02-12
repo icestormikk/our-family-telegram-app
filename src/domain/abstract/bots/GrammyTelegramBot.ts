@@ -85,6 +85,7 @@ export default abstract class GrammyTelegramBot<T extends GrammyTelegramBotConte
         if(!text)
             return;
 
+        this._logger.trace(`${this.username} is mentioned? ${text.includes(this.username)}`)
         if(text.includes(this.username))
             await this.onMention(ctx);
     }

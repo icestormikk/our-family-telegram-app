@@ -22,10 +22,14 @@ import MalishkaGrammyTelegramBot from "./domain/bots/MalishkaGrammyTelegramBot";
 import MishkaGrammyTelegramBot from "./domain/bots/MishkaGrammyTelegramBot";
 import LisichkaGrammyTelegramBot from "./domain/bots/LisichkaGrammyTelegramBot";
 import ZaykaGrammyTelegramBot from "./domain/bots/ZaykaGrammyTelegramBot";
+import {loadEnvFile} from "node:process";
 
 (async function() {
     const XLogger: Logger = new PinoLogger();
-    const XEnvironment: Environment = new ProcessEnvironment(".env");
+
+    if(process.env.NODE_ENV != 'production')
+        loadEnvFile();
+    const XEnvironment: Environment = new ProcessEnvironment();
 
     try {
         XLogger.trace("Initializing database..")
@@ -63,10 +67,12 @@ import ZaykaGrammyTelegramBot from "./domain/bots/ZaykaGrammyTelegramBot";
 
         const onShutdown = async () => {
             for(const bot of BotsContainer.getAllBots())
-                await bot.stop();
+                bot.stop();
 
             await XRedisClientPool.close();
+            XLogger.info("Redis connection pool successfully closed")
             await XDatabase.destroy();
+            XLogger.info("Database connection successfully closed")
             await XEventSystem.stop();
         };
 

@@ -37,6 +37,7 @@ export default class EventSystem implements IEventSystem, RedisStreamPublisher {
 
     async stop(): Promise<void> {
         this._checkEventsJob.destroy();
+        this._logger.info("Event system stopped")
     }
 
     protected async checkEvents(): Promise<void> {

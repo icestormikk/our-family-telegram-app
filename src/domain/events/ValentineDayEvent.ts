@@ -11,8 +11,8 @@ export default class ValentineDayEvent extends DatetimeEvent {
 
     public constructor(logger: Logger, telegramChatService: ITelegramChatService, deepseekClient: DeepseekClient) {
         const now = new Date()
-        const start = new Date(now.getFullYear(), 1, 7, 0, 0, 0);
-        const end = new Date(now.getFullYear(), 1, 8, 0, 0, 0);
+        const start = new Date(now.getFullYear(), 1, 14, 0, 0, 0);
+        const end = new Date(now.getFullYear(), 1, 15, 0, 0, 0);
 
         super("valentine-day-event", start, end, logger)
 
